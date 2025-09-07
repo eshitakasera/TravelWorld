@@ -1,0 +1,26 @@
+<% layout("boilerplate") -%>
+<body>
+    <!-- <form method="GET" action="/listings/new">
+        <button>create new listings</button>
+    </form> -->
+   <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-1">
+        <% for(let listing of allListings){ %>
+
+  <div class="card " >
+      <a href="/listings/<%=listing._id%>" class="anchor">
+  <img class="card-img-top" src="<%= listing.image.url %>" alt="Card image cap">
+  </a>
+  <div class="card-img-overlay">
+    <b><i>eshita❤️</i></b>
+  </div>
+  <div class="card-body">
+   <p>
+    &#8377 <%=listing.price%>/day
+    <br>
+     <a href="/listings/<%=listing._id%>" class="gren"><b><%=listing.title%></b></a>
+   </p>
+  </div>
+</div>
+ <%}%>
+</div>
+</body>
