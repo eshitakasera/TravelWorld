@@ -1,52 +1,108 @@
-const express=require("express");
-const mongoose = require("mongoose");
-const app = express();
-const ejsMate = require("ejs-mate");
-// ejs-mate ko template engine bana rahe hain
-app.engine("ejs", ejsMate);
-const path = require("path");
-app.use(express.static(path.join(__dirname,"models","public")));
-const Listing = require("./models/models/listing.js"); 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "models","views"));//cz models k ander views me hai
-app.listen(3000, () => {
-    console.log("Server started on port 3000");
-});
-app.use(express.urlencoded({ extended: true }));
-app.get("/", (req, res) => {
-  res.send("Server is running!");
-});
-app.get("/listings", async (req, res) => {
-    const allListings = await Listing.find({});
-    console.log(allListings);
-    res.render("index", { allListings });//agr views k ander bhi koi folderr hota to vo render me likhte
-});
-app.get("/listings/new",async (req,res)=>{
-    res.render("new");
-});
-app.get("/listings/:id",async(req,res)=>{
-  let {id}=req.params;
-  const listing=await  Listing.findById(id);
-  res.render("show",{listing});
-});
-app.post("/listings:id",async (req,res)=>{
-  let listing=req.body.listing;
-  console.log(listing);
-  const newListing=new Listing(req.body.listing);
-  await newListing.save();
-  res.redirect("/listings");
-
-});
-app.delete("/listings/:id",async(req,res)=>{
-  let {id}=req.params;
-  const deletelisting=await Listing.findByIdAndDelete(id);
-  res.redirect("/listings");
-});
-main()
-  .then(() => console.log("Connected to DB"))
-  .catch(err => console.log(err));
-
-async function main() {
-  await mongoose.connect(MONGO_URL);
+if (process.env.NODE_ENV != "production") {
+  require("dotenv").config();
 }
+const express = require("express");
+const app = express();
+const port = 8080;
+const mongoose = require("mongoose");
+const path = require("path");
+let methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
+const ExpressError = require("./utils/ExpressError.js");
+const session = require("express-session");
+const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
+const MongoStore = require("connect-mongo");
+
+const listingsRouter = require("./routes/listing.js");
+const reviewsRouter = require("./routes/review.js");
+const usersRouter = require("./routes/user.js");
+
+const dbUrl = process.env.ATLASDB_URL;
+main()
+  .then(() => {
+    console.log("connected to DB");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+async function main() {
+  await mongoose.connect(dbUrl);
+}
+
+app.engine("ejs", ejsMate);
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.json());
+
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  crypto: {
+    secret: process.env.SECRET,
+  },
+  touchAfter: 24 * 3600,
+});
+
+store.on("error", () => {
+  console.log("ERROR IN MONGO SESSION STORE", err);
+});
+
+const sessionOptions = {
+  store,
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  },
+};
+
+app.use(session(sessionOptions));
+app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use((req, res, next) => {
+  console.log("Current user is:", req.user);
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  res.locals.currUser = req.user;
+  next();
+});
+
+
+
+app.get("/", (req, res) => {
+  res.redirect("/listings"); 
+});
+
+
+
+app.use("/listings", listingsRouter);
+app.use("/listings/:id/reviews", reviewsRouter);
+app.use("/", usersRouter);
+
+app.all("/{*any}", (req, res, next) => {
+  next(new ExpressError(404, "Page not found"));
+});
+
+app.use((err, req, res, next) => {
+  let { statusCode = 500, message = "something went wrong" } = err;
+  res.status(statusCode).render("error.ejs", { message });
+});
+
+app.listen(port, (req, res) => {
+  console.log(`App is listening to port ${port}`);
+});
