@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const initdata = require("./data.js");   // same folder
-const Listing = require("../models/listing.js");  // ek level upar
+const Listing = require("../models/models/listing.js");  // ek level upar
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
