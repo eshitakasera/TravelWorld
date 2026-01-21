@@ -7,7 +7,7 @@ This project was built as a hands-on exercise in full-stack development using th
 ---
 ## 🚀 Live Demo
 
-Check it out:-[TravaNest](https://travanest-rm4f.onrender.com/)
+Check it out:-[TravelWorld](https://travanest-rm4f.onrender.com/)
 
 ---
 
