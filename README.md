@@ -1,13 +1,13 @@
-# 🏡 TravaNest – Airbnb Clone
+# 🏡 TravelWorld – Airbnb Clone
 
-**TravaNest** is a full-stack vacation rental web application inspired by Airbnb. It allows users to list, and review properties — offering a complete simulation of a real-world booking platform.
+**TravelWorld** is a full-stack vacation rental web application inspired by Airbnb. It allows users to list, and review properties — offering a complete simulation of a real-world booking platform.
 
 This project was built as a hands-on exercise in full-stack development using the **MVC architecture** and a modern tech stack.
 
 ---
 ## 🚀 Live Demo
 
-Check it out:-[TravaNest](https://travanest-rm4f.onrender.com/)
+Check it out:-[TravelWorld](https://travanest-rm4f.onrender.com/)
 
 ---
 
@@ -78,9 +78,5 @@ Check it out:-[TravaNest](https://travanest-rm4f.onrender.com/)
 
 ## 📬 Contact
 
-**Simran Kant**   
-🔗 [Portfolio](https://simrankant.vercel.app) • [LinkedIn](https://www.linkedin.com/in/simran-kant-74056a281/)
-
----
 
 ⭐ **If you liked this project, consider giving it a star!**
